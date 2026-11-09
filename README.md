@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/images/app_logo.png" width="120" height="120" alt="HabitQuest Logo" style="border-radius: 50%;" />
+</p>
+
 # HabitQuest ⚔️ – Gamified RPG Habit & Routine Tracker
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)

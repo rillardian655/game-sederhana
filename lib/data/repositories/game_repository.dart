@@ -3,6 +3,7 @@ import '../models/hero_model.dart';
 import '../models/quest_model.dart';
 import '../models/reward_model.dart';
 import '../models/activity_log_model.dart';
+import '../models/achievement_model.dart';
 import '../services/storage_service.dart';
 
 class GameRepository {
@@ -140,6 +141,69 @@ class GameRepository {
     // Keep last 50 logs only
     final trimmed = logs.take(50).map((l) => l.toJson()).toList();
     await storageService.saveLogs(trimmed);
+  }
+
+  Future<List<AchievementModel>> loadAchievements() async {
+    final list = storageService.getAchievements();
+    if (list.isEmpty) {
+      final defaultAchievements = [
+        const AchievementModel(
+          id: 'first_quest',
+          title: 'Langkah Pertama',
+          description: 'Selesaikan misi petualangan pertamamu.',
+          icon: '🥉',
+          rewardExp: 30,
+          rewardGold: 15,
+        ),
+        const AchievementModel(
+          id: 'trio_quests',
+          title: 'Trio Disiplin',
+          description: 'Selesaikan minimal 3 misi dalam 1 hari.',
+          icon: '🥈',
+          rewardExp: 50,
+          rewardGold: 25,
+        ),
+        const AchievementModel(
+          id: 'streak_3',
+          title: 'Konsistensi Baja',
+          description: 'Capai rekor 3 hari streak berturut-turut.',
+          icon: '🥇',
+          rewardExp: 100,
+          rewardGold: 50,
+        ),
+        const AchievementModel(
+          id: 'level_3',
+          title: 'Ksatria Tangguh',
+          description: 'Tingkatkan level pahlawanmu hingga Level 3.',
+          icon: '👑',
+          rewardExp: 150,
+          rewardGold: 75,
+        ),
+        const AchievementModel(
+          id: 'first_reward',
+          title: 'Pelanggan Kedai',
+          description: 'Tukarkan hadiah pertamamu di kedai.',
+          icon: '🍺',
+          rewardExp: 40,
+          rewardGold: 20,
+        ),
+        const AchievementModel(
+          id: 'rich_hero',
+          title: 'Juragan Koin',
+          description: 'Kumpulkan total simpanan minimal 150 Gold.',
+          icon: '💰',
+          rewardExp: 60,
+          rewardGold: 30,
+        ),
+      ];
+      await saveAchievements(defaultAchievements);
+      return defaultAchievements;
+    }
+    return list.map((e) => AchievementModel.fromJson(e)).toList();
+  }
+
+  Future<void> saveAchievements(List<AchievementModel> achievements) async {
+    await storageService.saveAchievements(achievements.map((a) => a.toJson()).toList());
   }
 }
 

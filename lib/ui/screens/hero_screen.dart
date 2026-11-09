@@ -22,11 +22,20 @@ class HeroScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Text('🛡️', style: TextStyle(fontSize: 22)),
-            SizedBox(width: 8),
-            Text('Status Pahlawan (Hero)'),
+            ClipOval(
+              child: Image.asset(
+                'assets/images/app_logo.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Text('🛡️', style: TextStyle(fontSize: 22)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text('Status Pahlawan (Hero)'),
           ],
         ),
       ),

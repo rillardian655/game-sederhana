@@ -6,6 +6,7 @@ class StorageService {
   static const String _questsKey = 'habit_quest_quests';
   static const String _rewardsKey = 'habit_quest_rewards';
   static const String _logsKey = 'habit_quest_logs';
+  static const String _achievementsKey = 'habit_quest_achievements';
 
   final SharedPreferences _prefs;
 
@@ -77,6 +78,22 @@ class StorageService {
 
   Future<bool> saveLogs(List<Map<String, dynamic>> data) async {
     return _prefs.setString(_logsKey, jsonEncode(data));
+  }
+
+  // Achievements
+  List<Map<String, dynamic>> getAchievements() {
+    final raw = _prefs.getString(_achievementsKey);
+    if (raw == null) return [];
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      return list.cast<Map<String, dynamic>>();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> saveAchievements(List<Map<String, dynamic>> data) async {
+    return _prefs.setString(_achievementsKey, jsonEncode(data));
   }
 
   Future<void> clearAll() async {

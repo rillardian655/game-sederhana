@@ -37,11 +37,20 @@ class _QuestListScreenState extends State<QuestListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Text('⚔️', style: TextStyle(fontSize: 22)),
-            SizedBox(width: 8),
-            Text('Misi Petualang (Quests)'),
+            ClipOval(
+              child: Image.asset(
+                'assets/images/app_logo.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Text('⚔️', style: TextStyle(fontSize: 22)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text('Misi Petualang (Quests)'),
           ],
         ),
       ),

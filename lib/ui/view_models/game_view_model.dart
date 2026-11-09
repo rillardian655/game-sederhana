@@ -7,6 +7,7 @@ import '../../data/models/quest_model.dart';
 import '../../data/models/reward_model.dart';
 import '../../data/models/activity_log_model.dart';
 import '../../data/models/achievement_model.dart';
+import '../../data/models/boss_model.dart';
 import '../../data/repositories/game_repository.dart';
 
 class GameViewModel extends ChangeNotifier {
@@ -18,6 +19,7 @@ class GameViewModel extends ChangeNotifier {
   List<RewardModel> _rewards = [];
   List<ActivityLogModel> _logs = [];
   List<AchievementModel> _achievements = [];
+  List<BossModel> _bosses = [];
   bool _isLoading = true;
 
   // Event callbacks for UI triggers (like level-up dialogs or alerts)
@@ -27,6 +29,9 @@ class GameViewModel extends ChangeNotifier {
   String? _penaltyAlertMessage;
   String? get penaltyAlertMessage => _penaltyAlertMessage;
 
+  String? _lastBossDefeatedMessage;
+  String? get lastBossDefeatedMessage => _lastBossDefeatedMessage;
+
   GameViewModel({required this.repository});
 
   HeroModel get hero => _hero;
@@ -34,7 +39,14 @@ class GameViewModel extends ChangeNotifier {
   List<RewardModel> get rewards => _rewards;
   List<ActivityLogModel> get logs => _logs;
   List<AchievementModel> get achievements => _achievements;
+  List<BossModel> get bosses => _bosses;
   bool get isLoading => _isLoading;
+
+  BossModel? get currentActiveBoss {
+    final undefeated = _bosses.where((b) => !b.isDefeated);
+    if (undefeated.isNotEmpty) return undefeated.first;
+    return _bosses.isNotEmpty ? _bosses.last : null;
+  }
 
   int get completedQuestsCount => _quests.where((q) => q.isCompletedToday).length;
   int get totalQuestsCount => _quests.length;
@@ -50,11 +62,17 @@ class GameViewModel extends ChangeNotifier {
     _rewards = await repository.loadRewards();
     _logs = await repository.loadLogs();
     _achievements = await repository.loadAchievements();
+    _bosses = await repository.loadBosses();
 
     await _checkDailyRollover();
     _checkAchievements();
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearBossDefeatedMessage() {
+    _lastBossDefeatedMessage = null;
     notifyListeners();
   }
 
@@ -203,6 +221,8 @@ class GameViewModel extends ChangeNotifier {
       ActivityType.questComplete,
     );
 
+    _attackActiveBossWithQuest(quest);
+
     _checkAchievements();
 
     notifyListeners();
@@ -342,6 +362,8 @@ class GameViewModel extends ChangeNotifier {
         shouldUnlock = true;
       } else if (ach.id == 'rich_hero' && _hero.gold >= 150) {
         shouldUnlock = true;
+      } else if (ach.id == 'boss_slayer' && _bosses.any((b) => b.isDefeated)) {
+        shouldUnlock = true;
       }
 
       if (shouldUnlock) {
@@ -411,6 +433,78 @@ class GameViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _attackActiveBossWithQuest(QuestModel quest) {
+    final activeBoss = currentActiveBoss;
+    if (activeBoss == null || activeBoss.isDefeated) return;
+
+    int baseDamage = switch (quest.difficulty) {
+      QuestDifficulty.easy => 30,
+      QuestDifficulty.medium => 55,
+      QuestDifficulty.hard => 90,
+      QuestDifficulty.epic => 150,
+    };
+
+    int bonusDamage = switch (_hero.heroClass) {
+      HeroClass.warrior => 15,
+      HeroClass.mage => 20,
+      HeroClass.rogue => 10,
+      HeroClass.paladin => 12,
+    };
+
+    final totalDmg = baseDamage + bonusDamage;
+    _damageBoss(activeBoss, totalDmg, 'Tebasan Misi "${quest.title}"');
+  }
+
+  Future<bool> castUltimateFocusSkill() async {
+    const cost = 20;
+    if (_hero.gold < cost) return false;
+
+    final activeBoss = currentActiveBoss;
+    if (activeBoss == null || activeBoss.isDefeated) return false;
+
+    _hero = _hero.copyWith(gold: _hero.gold - cost);
+    _damageBoss(activeBoss, 55, '⚡ Jurus Fokus Membara');
+
+    notifyListeners();
+    await _saveAll();
+    return true;
+  }
+
+  void _damageBoss(BossModel boss, int damage, String attackSource) {
+    final bossIndex = _bosses.indexWhere((b) => b.id == boss.id);
+    if (bossIndex == -1) return;
+
+    final newHp = (boss.currentHp - damage).clamp(0, boss.maxHp);
+    final isNowDefeated = newHp <= 0;
+
+    _bosses[bossIndex] = boss.copyWith(
+      currentHp: newHp,
+      isDefeated: isNowDefeated,
+    );
+
+    _addLog(
+      '⚔️ $attackSource memberi $damage DMG ke [${boss.name}]! (Sisa HP: $newHp/${boss.maxHp})',
+      ActivityType.bossAttack,
+    );
+
+    if (isNowDefeated) {
+      _hero = _hero.copyWith(
+        currentExp: _hero.currentExp + boss.rewardExp,
+        gold: _hero.gold + boss.rewardGold,
+      );
+
+      _addLog(
+        '👑 KEMENANGAN BESAR! Bos "${boss.name}" Berhasil Dikalahkan! (+${boss.rewardExp} EXP, +${boss.rewardGold} Gold)',
+        ActivityType.bossDefeated,
+      );
+
+      _lastBossDefeatedMessage =
+          'Selamat Pahlawan!\nBos "${boss.name}" (Level ${boss.bossLevel}) berhasil kamu tumbangkan!\n\n🎁 Hadiah Peti Rampasan:\n+${boss.rewardExp} EXP & +${boss.rewardGold} Koin Emas!';
+
+      _checkAchievements();
+    }
+  }
+
   void _addLog(String message, ActivityType type) {
     final log = ActivityLogModel(
       id: _uuid.v4(),
@@ -432,6 +526,7 @@ class GameViewModel extends ChangeNotifier {
       repository.saveRewards(_rewards),
       repository.saveLogs(_logs),
       repository.saveAchievements(_achievements),
+      repository.saveBosses(_bosses),
     ]);
   }
 }

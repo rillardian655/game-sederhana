@@ -4,6 +4,8 @@
 
 # HabitQuest ⚔️ – Gamified RPG Habit & Routine Tracker
 
+[![Download APK](https://img.shields.io/badge/Download_APK-HabitQuest.apk-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/rillardian655/game-sederhana/releases/download/v1.0.0/HabitQuest.apk)
+
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://www.android.com/)
@@ -25,7 +27,22 @@
 * **Filter Interaktif:** Filter antara Semua, Pending, dan Selesai.
 * **Streak Counter:** Catat rekor berapa hari berturut-turut kamu konsisten menyelesaikan setiap misi.
 
-### 2. 🛡️ Hero Progression & Game Mechanics
+### 2. 🐉 Dungeon Bos Monster (Boss Raid Arena)
+* **Serangan Otomatis Saat Selesaikan Misi:** Setiap kali kamu menyelesaikan misi harian di dunia nyata, pahlawanmu otomatis menebas bos aktif di dungeon!
+* **Pasif Serangan Tiap Kelas:**
+  * ⚔️ Warrior: Tebasan Fisik (+15 DMG)
+  * 🧙‍♂️ Mage: Ledakan Sihir (+20 DMG)
+  * 🗡️ Rogue: Serangan Mengendap (+10 DMG + Peluang Serangan Kritis)
+  * 🛡️ Paladin: Hukuman Suci (+12 DMG)
+* **⚡ Jurus Pamungkas Fokus:** Kerahkan skill spesial menggunakan 20 Gold untuk melancarkan 55 DMG instan ke Bos.
+* **4 Roster Bos Epik:**
+  1. 👾 **Slime Penunda Waktu** (150 HP)
+  2. 🦅 **Gryphon Distraksi Notifikasi** (320 HP)
+  3. 🐉 **Naga Kemalasan "Procrastidor"** (580 HP)
+  4. 👹 **Raja Iblis Burnout & Kelelahan** (950 HP)
+* **Hadiah Rampasan Peti Harta:** Kalahkan bos untuk mendapatkan ratusan bonus EXP, koin emas melimpah, dan membuka gelar Trofi *Pemburu Monster*!
+
+### 3. 🛡️ Hero Progression & Game Mechanics
 * **Sistem Level & EXP:** Kumpulkan EXP untuk naik level. Saat level naik, HP pulih penuh dan dapat bonus koin emas.
 * **4 Kelas Pahlawan dengan Pasif Berbeda:**
   * ⚔️ **Warrior:** Pertahanan kokoh (+25 Base HP).

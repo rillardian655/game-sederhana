@@ -3,7 +3,9 @@ enum ActivityType {
   levelUp('Level Naik!', '🌟'),
   damageTaken('Kena Serangan (Penalty)', '💥'),
   rewardBought('Beli Hadiah', '🍺'),
-  potionUsed('Minum Ramuan HP', '🧪');
+  potionUsed('Minum Ramuan HP', '🧪'),
+  bossAttack('Serangan Bos', '⚔️'),
+  bossDefeated('Bos Ditaklukkan!', '👑');
 
   final String label;
   final String icon;

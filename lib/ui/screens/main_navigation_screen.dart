@@ -6,6 +6,7 @@ import 'quest_list_screen.dart';
 import 'hero_screen.dart';
 import 'tavern_shop_screen.dart';
 import 'battle_log_screen.dart';
+import 'dungeon_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final GameViewModel viewModel;
@@ -49,6 +50,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       vm.clearPenaltyAlert();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showPenaltyDialog(msg);
+      });
+    }
+
+    // Check Boss Defeat Alert
+    if (vm.lastBossDefeatedMessage != null && mounted) {
+      final msg = vm.lastBossDefeatedMessage!;
+      vm.clearBossDefeatedMessage();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showBossDefeatedDialog(msg);
       });
     }
   }
@@ -136,6 +146,61 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 
+  void _showBossDefeatedDialog(String message) {
+    HapticFeedback.heavyImpact();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppTheme.gold, width: 2),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            const Text('👑 🏆 ⚔️', style: TextStyle(fontSize: 36)),
+            const SizedBox(height: 12),
+            const Text(
+              'BOS DITAKLUKKAN!',
+              style: TextStyle(
+                color: AppTheme.gold,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.gold,
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 44),
+              ),
+              child: const Text(
+                'Klaim Rampasan & Lanjut!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = widget.viewModel;
@@ -161,8 +226,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final screens = [
       QuestListScreen(
         viewModel: vm,
-        onNavigateToHero: () => setState(() => _currentIndex = 1),
+        onNavigateToHero: () => setState(() => _currentIndex = 2),
       ),
+      DungeonScreen(viewModel: vm),
       HeroScreen(viewModel: vm),
       TavernShopScreen(viewModel: vm),
       BattleLogScreen(viewModel: vm),
@@ -187,6 +253,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: const Text('⚔️', style: TextStyle(fontSize: 18)),
               selectedIcon: const Text('⚔️', style: TextStyle(fontSize: 22)),
               label: 'Misi (${vm.completedQuestsCount}/${vm.totalQuestsCount})',
+            ),
+            NavigationDestination(
+              icon: const Text('🐉', style: TextStyle(fontSize: 18)),
+              selectedIcon: const Text('🐉', style: TextStyle(fontSize: 22)),
+              label: vm.currentActiveBoss != null && !vm.currentActiveBoss!.isDefeated
+                  ? 'Bos (${(vm.currentActiveBoss!.currentHp / vm.currentActiveBoss!.maxHp * 100).toInt()}%)'
+                  : 'Dungeon',
             ),
             const NavigationDestination(
               icon: Text('🛡️', style: TextStyle(fontSize: 18)),

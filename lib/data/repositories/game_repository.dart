@@ -4,6 +4,7 @@ import '../models/quest_model.dart';
 import '../models/reward_model.dart';
 import '../models/activity_log_model.dart';
 import '../models/achievement_model.dart';
+import '../models/boss_model.dart';
 import '../services/storage_service.dart';
 
 class GameRepository {
@@ -195,6 +196,14 @@ class GameRepository {
           rewardExp: 60,
           rewardGold: 30,
         ),
+        const AchievementModel(
+          id: 'boss_slayer',
+          title: 'Pemburu Monster',
+          description: 'Kalahkan bos monster pertamamu di Dungeon Raid!',
+          icon: '🐉',
+          rewardExp: 120,
+          rewardGold: 60,
+        ),
       ];
       await saveAchievements(defaultAchievements);
       return defaultAchievements;
@@ -204,6 +213,73 @@ class GameRepository {
 
   Future<void> saveAchievements(List<AchievementModel> achievements) async {
     await storageService.saveAchievements(achievements.map((a) => a.toJson()).toList());
+  }
+
+  Future<List<BossModel>> loadBosses() async {
+    final list = storageService.getBosses();
+    if (list.isEmpty) {
+      final defaultBosses = [
+        const BossModel(
+          id: 'boss_1',
+          name: 'Slime Penunda Waktu',
+          subtitle: 'Makhluk Lembek Pembuat Mager',
+          avatar: '👾',
+          maxHp: 150,
+          currentHp: 150,
+          rewardExp: 80,
+          rewardGold: 45,
+          bossLevel: 1,
+          description:
+              'Slime beracun yang membuat pahlawan menunda tugas-tugas kecil sampai menumpuk tinggi.',
+        ),
+        const BossModel(
+          id: 'boss_2',
+          name: 'Gryphon Distraksi',
+          subtitle: 'Pencuri Fokus & Layar Medsos',
+          avatar: '🦅',
+          maxHp: 320,
+          currentHp: 320,
+          rewardExp: 160,
+          rewardGold: 90,
+          bossLevel: 2,
+          description:
+              'Monster bersayap yang membombardir pikiran dengan scrolling tiada henti dan notifikasi palsu.',
+        ),
+        const BossModel(
+          id: 'boss_3',
+          name: 'Naga Kemalasan "Procrastidor"',
+          subtitle: 'Penguasa Zona Nyaman Abadi',
+          avatar: '🐉',
+          maxHp: 580,
+          currentHp: 580,
+          rewardExp: 280,
+          rewardGold: 160,
+          bossLevel: 3,
+          description:
+              'Naga legendaris yang menghembuskan hawa kantuk berat dan membuat tempat tidur terasa terlalu nyaman.',
+        ),
+        const BossModel(
+          id: 'boss_4',
+          name: 'Raja Iblis Burnout',
+          subtitle: 'Penguasa Stres & Beban Mental',
+          avatar: '👹',
+          maxHp: 950,
+          currentHp: 950,
+          rewardExp: 500,
+          rewardGold: 300,
+          bossLevel: 4,
+          description:
+              'Penguasa terdalam dungeon yang hanya bisa ditaklukkan dengan disiplin konsisten dan keseimbangan hidup.',
+        ),
+      ];
+      await saveBosses(defaultBosses);
+      return defaultBosses;
+    }
+    return list.map((e) => BossModel.fromJson(e)).toList();
+  }
+
+  Future<void> saveBosses(List<BossModel> bosses) async {
+    await storageService.saveBosses(bosses.map((b) => b.toJson()).toList());
   }
 }
 

@@ -81,5 +81,29 @@ void main() {
 
       expect(viewModel.hero.currentHp, lessThan(initialHp));
     });
+
+    test('Completing quest attacks active boss and deals damage', () async {
+      final boss = viewModel.currentActiveBoss;
+      expect(boss, isNotNull);
+      final initialBossHp = boss!.currentHp;
+
+      final easyQuest = viewModel.quests.first;
+      await viewModel.completeQuest(easyQuest.id);
+
+      final updatedBoss = viewModel.currentActiveBoss;
+      expect(updatedBoss!.currentHp, lessThan(initialBossHp));
+    });
+
+    test('Ultimate focus skill costs gold and damages boss', () async {
+      final boss = viewModel.currentActiveBoss;
+      expect(boss, isNotNull);
+      final initialHp = boss!.currentHp;
+      final initialGold = viewModel.hero.gold;
+
+      final success = await viewModel.castUltimateFocusSkill();
+      expect(success, isTrue);
+      expect(viewModel.hero.gold, initialGold - 20);
+      expect(viewModel.currentActiveBoss!.currentHp, initialHp - 55);
+    });
   });
 }

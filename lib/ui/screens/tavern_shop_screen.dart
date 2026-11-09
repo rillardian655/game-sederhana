@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../view_models/game_view_model.dart';
 import '../widgets/reward_card.dart';
@@ -110,6 +111,7 @@ class TavernShopScreen extends StatelessWidget {
                         reward: reward,
                         playerGold: gold,
                         onBuy: () async {
+                          HapticFeedback.lightImpact();
                           final success = await viewModel.buyReward(reward);
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(

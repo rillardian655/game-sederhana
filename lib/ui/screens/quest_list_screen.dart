@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/quest_model.dart';
 import '../view_models/game_view_model.dart';
@@ -168,6 +169,7 @@ class _QuestListScreenState extends State<QuestListScreen> {
                     return QuestCard(
                       quest: quest,
                       onComplete: () {
+                        HapticFeedback.mediumImpact();
                         vm.completeQuest(quest.id);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

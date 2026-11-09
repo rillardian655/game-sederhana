@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../view_models/game_view_model.dart';
 import 'quest_list_screen.dart';
@@ -53,6 +54,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _showLevelUpDialog(String message) {
+    HapticFeedback.heavyImpact();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -103,6 +105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _showPenaltyDialog(String message) {
+    HapticFeedback.vibrate();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

@@ -21,33 +21,46 @@ class RewardCard extends StatelessWidget {
     final canAfford = playerGold >= reward.costGold;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF111728),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: canAfford ? AppTheme.gold.withValues(alpha: 0.3) : const Color(0xFF2E3F5B),
-          width: 1.0,
+          color: canAfford ? AppTheme.gold.withValues(alpha: 0.5) : const Color(0xFF222E47),
+          width: canAfford ? 1.5 : 1.0,
         ),
+        boxShadow: canAfford
+            ? [
+                BoxShadow(
+                  color: AppTheme.gold.withValues(alpha: 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Icon Container
+          // Icon Container with Runic Glow
           Container(
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceLight,
-              borderRadius: BorderRadius.circular(14),
+              color: canAfford
+                  ? AppTheme.gold.withValues(alpha: 0.15)
+                  : const Color(0xFF182238),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: canAfford ? AppTheme.gold.withValues(alpha: 0.5) : Colors.transparent,
+                color: canAfford ? AppTheme.gold.withValues(alpha: 0.6) : const Color(0xFF2E3F5B),
+                width: 1.2,
               ),
             ),
             alignment: Alignment.center,
             child: Text(
               reward.icon,
-              style: const TextStyle(fontSize: 24),
+              style: const TextStyle(fontSize: 26),
             ),
           ),
           const SizedBox(width: 14),
@@ -57,13 +70,19 @@ class RewardCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  reward.title,
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        reward.title,
+                        style: const TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (reward.description.isNotEmpty) ...[
                   const SizedBox(height: 3),
@@ -72,31 +91,33 @@ class RewardCard extends StatelessWidget {
                     style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 12,
+                      height: 1.3,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppTheme.goldBg,
+                        color: AppTheme.gold.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.5)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('🪙', style: TextStyle(fontSize: 12)),
+                          const Icon(Icons.monetization_on_rounded, size: 14, color: AppTheme.gold),
                           const SizedBox(width: 4),
                           Text(
                             '${reward.costGold} Gold',
                             style: const TextStyle(
                               color: AppTheme.gold,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11.5,
                             ),
                           ),
                         ],
@@ -104,11 +125,19 @@ class RewardCard extends StatelessWidget {
                     ),
                     if (reward.timesRedeemed > 0) ...[
                       const SizedBox(width: 8),
-                      Text(
-                        'Ditukar ${reward.timesRedeemed}x',
-                        style: const TextStyle(
-                          color: AppTheme.textMuted,
-                          fontSize: 11,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Ditukar ${reward.timesRedeemed}x',
+                          style: const TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -118,38 +147,50 @@ class RewardCard extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
 
-          // Action Button
+          // Action Button & Delete
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
                 onPressed: canAfford ? onBuy : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: canAfford ? AppTheme.gold : AppTheme.surfaceLight,
-                  foregroundColor: canAfford ? Colors.black87 : AppTheme.textMuted,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  backgroundColor: canAfford ? AppTheme.gold : const Color(0xFF1E283F),
+                  foregroundColor: canAfford ? Colors.black : AppTheme.textMuted,
+                  disabledBackgroundColor: const Color(0xFF192135),
+                  disabledForegroundColor: AppTheme.textMuted.withValues(alpha: 0.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  elevation: canAfford ? 4 : 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: canAfford ? AppTheme.gold : const Color(0xFF283652),
+                      width: 1,
+                    ),
                   ),
                 ),
                 child: Text(
-                  canAfford ? 'Tukar' : 'Kunci',
+                  canAfford ? 'Tukar' : 'Terkunci',
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12.5,
                   ),
                 ),
               ),
               if (!reward.isDefault && onDelete != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 GestureDetector(
                   onTap: onDelete,
-                  child: const Text(
-                    'Hapus',
-                    style: TextStyle(
-                      color: AppTheme.hpRed,
-                      fontSize: 11,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    child: const Text(
+                      'Hapus',
+                      style: TextStyle(
+                        color: AppTheme.textMuted,
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
@@ -161,4 +202,3 @@ class RewardCard extends StatelessWidget {
     );
   }
 }
-

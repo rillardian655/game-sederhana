@@ -16,44 +16,91 @@ class TavernShopScreen extends StatelessWidget {
     final gold = viewModel.hero.gold;
 
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Row(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Row(
           children: [
-            Text('🍺', style: TextStyle(fontSize: 22)),
-            SizedBox(width: 8),
-            Text('Kedai Hadiah (Tavern)'),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.gold.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.gold.withValues(alpha: 0.4)),
+              ),
+              child: const Icon(Icons.storefront_rounded, size: 20, color: AppTheme.gold),
+            ),
+            const SizedBox(width: 10),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'KEDAI PETUALANG',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                Text(
+                  'Toko Self-Reward & Hadiah Disiplin',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
       body: Column(
         children: [
-          // Tavern Ambiance & Gold Balance Banner
+          // Tavern Vault & Balance Card
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [
-                  AppTheme.goldBg.withValues(alpha: 0.4),
-                  AppTheme.surface,
+                  Color(0xFF2B200C),
+                  Color(0xFF191F30),
+                  Color(0xFF0F1524),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.4)),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: AppTheme.gold.withValues(alpha: 0.4), width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.gold.withValues(alpha: 0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: 52,
+                  height: 52,
                   decoration: BoxDecoration(
-                    color: AppTheme.goldBg,
-                    borderRadius: BorderRadius.circular(14),
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFD700), Color(0xFFFF9900)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.gold.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                      ),
+                    ],
                   ),
                   alignment: Alignment.center,
-                  child: const Text('🪙', style: TextStyle(fontSize: 26)),
+                  child: const Text('🪙', style: TextStyle(fontSize: 28)),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -61,11 +108,12 @@ class TavernShopScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Kantong Koin Kamu',
+                        'PERBENDAHARAAN GOLD',
                         style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textMuted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.1,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -73,19 +121,30 @@ class TavernShopScreen extends StatelessWidget {
                         '$gold Gold',
                         style: const TextStyle(
                           color: AppTheme.gold,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Text(
-                  'Tukar hadiah\nself-reward!',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: AppTheme.textMuted,
-                    fontSize: 11,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.gold.withValues(alpha: 0.2)),
+                  ),
+                  child: const Text(
+                    'Tukar koin dengan\nhadiah dunia nyata!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppTheme.textSecondary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
                   ),
                 ),
               ],
@@ -95,15 +154,42 @@ class TavernShopScreen extends StatelessWidget {
           // Rewards List
           Expanded(
             child: rewards.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Belum ada hadiah di kedai.\nBuat hadiah pertamamu!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.textSecondary),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF161F33),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFF283652)),
+                          ),
+                          child: const Icon(
+                            Icons.store_mall_directory_outlined,
+                            size: 40,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Etalase Kedai Masih Kosong',
+                          style: TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Tambahkan hadiah self-reward pertamamu!',
+                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                        ),
+                      ],
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: const EdgeInsets.only(bottom: 90),
                     itemCount: rewards.length,
                     itemBuilder: (context, index) {
                       final reward = rewards[index];
@@ -111,14 +197,18 @@ class TavernShopScreen extends StatelessWidget {
                         reward: reward,
                         playerGold: gold,
                         onBuy: () async {
-                          HapticFeedback.lightImpact();
+                          HapticFeedback.heavyImpact();
                           final success = await viewModel.buyReward(reward);
                           if (success && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
+                                backgroundColor: const Color(0xFF1A2338),
                                 content: Text(
                                   '🎉 Selamat menikmati: "${reward.title}"!',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    color: AppTheme.gold,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
                             );
@@ -131,36 +221,70 @@ class TavernShopScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppTheme.gold,
-        foregroundColor: Colors.black87,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Hadiah Baru',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (_) => AddRewardDialog(
-              onAdd: ({
-                required String title,
-                required String description,
-                required int costGold,
-                required String icon,
-              }) {
-                viewModel.addCustomReward(
-                  title: title,
-                  description: description,
-                  costGold: costGold,
-                  icon: icon,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD700), Color(0xFFFF9900)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.gold.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                showDialog(
+                  context: context,
+                  builder: (_) => AddRewardDialog(
+                    onAdd: ({
+                      required String title,
+                      required String description,
+                      required int costGold,
+                      required String icon,
+                    }) {
+                      viewModel.addCustomReward(
+                        title: title,
+                        description: description,
+                        costGold: costGold,
+                        icon: icon,
+                      );
+                    },
+                  ),
                 );
               },
+              borderRadius: BorderRadius.circular(18),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_circle_outline_rounded, color: Colors.black, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Hadiah Baru',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13.5,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
-

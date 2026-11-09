@@ -22,7 +22,7 @@ class QuestListScreen extends StatefulWidget {
 }
 
 class _QuestListScreenState extends State<QuestListScreen> {
-  int _selectedFilterIndex = 0; // 0: Semua, 1: Belum Selesai, 2: Selesai
+  int _selectedFilterIndex = 0; // 0: Semua, 1: Pending, 2: Selesai
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +35,60 @@ class _QuestListScreenState extends State<QuestListScreen> {
       return true;
     }).toList();
 
+    final pendingCount = allQuests.where((q) => !q.isCompletedToday).length;
+    final doneCount = allQuests.where((q) => q.isCompletedToday).length;
+
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: Row(
           children: [
-            ClipOval(
-              child: Image.asset(
-                'assets/images/app_logo.png',
-                width: 32,
-                height: 32,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Text('⚔️', style: TextStyle(fontSize: 22)),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.primaryGlow, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/app_logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Center(child: Text('⚔️', style: TextStyle(fontSize: 18))),
+                ),
               ),
             ),
-            const SizedBox(width: 10),
-            const Text('Misi Petualang (Quests)'),
+            const SizedBox(width: 12),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'HABITQUEST',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                Text(
+                  'Papan Misi & Kebiasaan Harian',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -59,6 +97,7 @@ class _QuestListScreenState extends State<QuestListScreen> {
         color: AppTheme.primary,
         backgroundColor: AppTheme.surface,
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
             // Hero Status Header Card
             SliverToBoxAdapter(
@@ -68,52 +107,101 @@ class _QuestListScreenState extends State<QuestListScreen> {
               ),
             ),
 
-            // Daily Progress Banner
+            // Daily Progress Objective Banner
             SliverToBoxAdapter(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primary.withValues(alpha: 0.15),
-                      AppTheme.secondary.withValues(alpha: 0.15),
-                    ],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF15223A), Color(0xFF10192A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.borderLight,
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Progres Hari Ini',
-                          style: TextStyle(
-                            color: AppTheme.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppTheme.secondary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.track_changes_rounded,
+                                color: AppTheme.secondary,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Target Misi Hari Ini',
+                              style: TextStyle(
+                                color: AppTheme.textPrimary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${vm.completedQuestsCount} / ${vm.totalQuestsCount} Selesai (${(vm.todayProgress * 100).toInt()}%)',
-                          style: const TextStyle(
-                            color: AppTheme.secondary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.secondary.withValues(alpha: 0.4)),
+                          ),
+                          child: Text(
+                            '$doneCount / ${allQuests.length} (${(vm.todayProgress * 100).toInt()}%)',
+                            style: const TextStyle(
+                              color: AppTheme.secondary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: vm.todayProgress,
-                        minHeight: 8,
-                        backgroundColor: AppTheme.surfaceLight,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.secondary),
+                      child: Container(
+                        height: 8,
+                        color: const Color(0xFF0D1726),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Align(
+                              alignment: Alignment.centerLeft,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                width: constraints.maxWidth * vm.todayProgress,
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -121,29 +209,27 @@ class _QuestListScreenState extends State<QuestListScreen> {
               ),
             ),
 
-            // Filter Chips
+            // Segmented Game Filter Bar
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.borderLight, width: 1),
+                ),
                 child: Row(
                   children: [
-                    _buildFilterChip(0, 'Semua (${allQuests.length})'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      1,
-                      'Pending (${allQuests.where((q) => !q.isCompletedToday).length})',
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      2,
-                      'Selesai (${allQuests.where((q) => q.isCompletedToday).length})',
-                    ),
+                    _buildSegmentFilter(0, 'Semua', allQuests.length),
+                    _buildSegmentFilter(1, 'Pending', pendingCount),
+                    _buildSegmentFilter(2, 'Selesai', doneCount),
                   ],
                 ),
               ),
             ),
 
-            // Quest List or Empty State
+            // Quests List or Empty State
             if (filteredQuests.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -153,16 +239,30 @@ class _QuestListScreenState extends State<QuestListScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('🛡️', style: TextStyle(fontSize: 48)),
-                        const SizedBox(height: 12),
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceLight,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.borderGlow, width: 1.5),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            _selectedFilterIndex == 2 ? '🏆' : '📜',
+                            style: const TextStyle(fontSize: 32),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         Text(
                           _selectedFilterIndex == 2
-                              ? 'Belum ada misi yang selesai hari ini.\nYuk mulai satu!'
-                              : 'Tidak ada misi dalam kategori ini.',
+                              ? 'Belum ada misi yang selesai hari ini.\nYuk selesaikan satu misi pertamamu!'
+                              : 'Tidak ada misi aktif.\nTambahkan misi baru untuk mulai berpetualang!',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: AppTheme.textSecondary,
-                            fontSize: 14,
+                            fontSize: 13,
+                            height: 1.4,
                           ),
                         ),
                       ],
@@ -184,7 +284,7 @@ class _QuestListScreenState extends State<QuestListScreen> {
                           SnackBar(
                             content: Row(
                               children: [
-                                const Text('✨ ', style: TextStyle(fontSize: 16)),
+                                const Text('⚔️ ', style: TextStyle(fontSize: 16)),
                                 Expanded(
                                   child: Text(
                                     'Quest Selesai! +${quest.difficulty.expReward} EXP & +${quest.difficulty.goldReward} Gold!',
@@ -205,61 +305,106 @@ class _QuestListScreenState extends State<QuestListScreen> {
                 ),
               ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Misi Baru',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (_) => AddQuestDialog(
-              onAdd: ({
-                required String title,
-                required String description,
-                required QuestCategory category,
-                required QuestDifficulty difficulty,
-              }) {
-                vm.addQuest(
-                  title: title,
-                  description: description,
-                  category: category,
-                  difficulty: difficulty,
-                );
-              },
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: AppTheme.purpleGradient,
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withValues(alpha: 0.4),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
-          );
-        },
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add_task_rounded, size: 20),
+          label: const Text(
+            'Misi Baru',
+            style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.5),
+          ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) => AddQuestDialog(
+                onAdd: ({
+                  required String title,
+                  required String description,
+                  required QuestCategory category,
+                  required QuestDifficulty difficulty,
+                }) {
+                  vm.addQuest(
+                    title: title,
+                    description: description,
+                    category: category,
+                    difficulty: difficulty,
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildFilterChip(int index, String label) {
+  Widget _buildSegmentFilter(int index, String label, int count) {
     final isSelected = _selectedFilterIndex == index;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      selectedColor: AppTheme.surfaceLight,
-      backgroundColor: AppTheme.surface,
-      side: BorderSide(
-        color: isSelected ? AppTheme.primary : const Color(0xFF2E3F5B),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          setState(() => _selectedFilterIndex = index);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            gradient: isSelected ? AppTheme.purpleGradient : null,
+            color: isSelected ? null : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : AppTheme.textSecondary,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppTheme.textMuted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      labelStyle: TextStyle(
-        color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
-      onSelected: (val) {
-        if (val) setState(() => _selectedFilterIndex = index);
-      },
     );
   }
 }
-

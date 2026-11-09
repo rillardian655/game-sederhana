@@ -6,6 +6,7 @@ import '../../data/models/hero_model.dart';
 import '../../data/models/quest_model.dart';
 import '../../data/models/reward_model.dart';
 import '../../data/models/activity_log_model.dart';
+import '../../data/models/achievement_model.dart';
 import '../../data/repositories/game_repository.dart';
 
 class GameViewModel extends ChangeNotifier {
@@ -16,6 +17,7 @@ class GameViewModel extends ChangeNotifier {
   List<QuestModel> _quests = [];
   List<RewardModel> _rewards = [];
   List<ActivityLogModel> _logs = [];
+  List<AchievementModel> _achievements = [];
   bool _isLoading = true;
 
   // Event callbacks for UI triggers (like level-up dialogs or alerts)
@@ -31,6 +33,7 @@ class GameViewModel extends ChangeNotifier {
   List<QuestModel> get quests => _quests;
   List<RewardModel> get rewards => _rewards;
   List<ActivityLogModel> get logs => _logs;
+  List<AchievementModel> get achievements => _achievements;
   bool get isLoading => _isLoading;
 
   int get completedQuestsCount => _quests.where((q) => q.isCompletedToday).length;
@@ -46,8 +49,10 @@ class GameViewModel extends ChangeNotifier {
     _quests = await repository.loadQuests();
     _rewards = await repository.loadRewards();
     _logs = await repository.loadLogs();
+    _achievements = await repository.loadAchievements();
 
     await _checkDailyRollover();
+    _checkAchievements();
 
     _isLoading = false;
     notifyListeners();
@@ -198,6 +203,8 @@ class GameViewModel extends ChangeNotifier {
       ActivityType.questComplete,
     );
 
+    _checkAchievements();
+
     notifyListeners();
     await _saveAll();
   }
@@ -270,6 +277,8 @@ class GameViewModel extends ChangeNotifier {
       _rewards[rIndex] = reward.copyWith(timesRedeemed: reward.timesRedeemed + 1);
     }
 
+    _checkAchievements();
+
     notifyListeners();
     await _saveAll();
     return true;
@@ -313,6 +322,95 @@ class GameViewModel extends ChangeNotifier {
     await repository.saveHero(_hero);
   }
 
+  void _checkAchievements() {
+    bool hasUpdates = false;
+    for (int i = 0; i < _achievements.length; i++) {
+      final ach = _achievements[i];
+      if (ach.isUnlocked) continue;
+
+      bool shouldUnlock = false;
+      if (ach.id == 'first_quest' && _hero.totalQuestsCompleted >= 1) {
+        shouldUnlock = true;
+      } else if (ach.id == 'trio_quests' && completedQuestsCount >= 3) {
+        shouldUnlock = true;
+      } else if (ach.id == 'streak_3' && _hero.streakDays >= 3) {
+        shouldUnlock = true;
+      } else if (ach.id == 'level_3' && _hero.level >= 3) {
+        shouldUnlock = true;
+      } else if (ach.id == 'first_reward' &&
+          _rewards.any((r) => r.timesRedeemed >= 1)) {
+        shouldUnlock = true;
+      } else if (ach.id == 'rich_hero' && _hero.gold >= 150) {
+        shouldUnlock = true;
+      }
+
+      if (shouldUnlock) {
+        _achievements[i] = ach.copyWith(isUnlocked: true);
+        _addLog('🏆 Pencapaian Terbuka: "${ach.title}"!', ActivityType.levelUp);
+        hasUpdates = true;
+      }
+    }
+
+    if (hasUpdates) {
+      repository.saveAchievements(_achievements);
+      notifyListeners();
+    }
+  }
+
+  Future<void> claimAchievement(String id) async {
+    final index = _achievements.indexWhere((a) => a.id == id);
+    if (index == -1) return;
+
+    final ach = _achievements[index];
+    if (!ach.isUnlocked || ach.isClaimed) return;
+
+    _achievements[index] = ach.copyWith(isClaimed: true);
+
+    int newExp = _hero.currentExp + ach.rewardExp;
+    int newLevel = _hero.level;
+    int currentMaxExp = _hero.maxExp;
+    int newHp = _hero.currentHp;
+    int newMaxHp = _hero.maxHp;
+    int newGold = _hero.gold + ach.rewardGold;
+
+    if (newExp >= currentMaxExp) {
+      newLevel += 1;
+      newExp -= currentMaxExp;
+      currentMaxExp = HeroModel.calculateMaxExp(newLevel);
+      newMaxHp = HeroModel.calculateMaxHp(newLevel, _hero.heroClass);
+      newHp = newMaxHp;
+      newGold += 35;
+      _lastLevelUpMessage =
+          'Selamat! Naik ke Level $newLevel!\nHP pulih penuh & dapat bonus 35 Gold!';
+    }
+
+    _hero = _hero.copyWith(
+      level: newLevel,
+      currentExp: newExp,
+      maxExp: currentMaxExp,
+      currentHp: newHp,
+      maxHp: newMaxHp,
+      gold: newGold,
+    );
+
+    _addLog(
+      '🎁 Klaim Trofi "${ach.title}": +${ach.rewardExp} EXP & +${ach.rewardGold} Gold!',
+      ActivityType.levelUp,
+    );
+
+    notifyListeners();
+    await _saveAll();
+  }
+
+  Future<void> simulateNextDay() async {
+    _hero = _hero.copyWith(
+      lastActiveDate: _hero.lastActiveDate.subtract(const Duration(days: 1)),
+    );
+    await _checkDailyRollover();
+    _checkAchievements();
+    notifyListeners();
+  }
+
   void _addLog(String message, ActivityType type) {
     final log = ActivityLogModel(
       id: _uuid.v4(),
@@ -333,6 +431,7 @@ class GameViewModel extends ChangeNotifier {
       repository.saveQuests(_quests),
       repository.saveRewards(_rewards),
       repository.saveLogs(_logs),
+      repository.saveAchievements(_achievements),
     ]);
   }
 }

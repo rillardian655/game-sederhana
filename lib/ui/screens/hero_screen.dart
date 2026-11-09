@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/hero_model.dart';
+import '../../data/models/achievement_model.dart';
 import '../view_models/game_view_model.dart';
 
 class HeroScreen extends StatelessWidget {
@@ -238,8 +240,234 @@ class HeroScreen extends StatelessWidget {
               AppTheme.success,
               isFullWidth: true,
             ),
+            const SizedBox(height: 24),
+
+            // Achievements Section
+            _buildAchievementsSection(context),
+
+            const SizedBox(height: 24),
+
+            // Demo Mode (Time Travel / Rollover Simulator)
+            _buildDemoSimulationCard(context),
+
+            const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementsSection(BuildContext context) {
+    final achievements = viewModel.achievements;
+    final unlockedCount = achievements.where((a) => a.isUnlocked).length;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF2E3F5B)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Text('🏆', style: TextStyle(fontSize: 18)),
+                  SizedBox(width: 8),
+                  Text(
+                    'Prestasi & Trofi',
+                    style: TextStyle(
+                      color: AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTheme.goldBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$unlockedCount / ${achievements.length} Terbuka',
+                  style: const TextStyle(
+                    color: AppTheme.gold,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: achievements.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final ach = achievements[index];
+              return _buildAchievementCard(context, ach);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementCard(BuildContext context, AchievementModel ach) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: ach.isUnlocked
+            ? (ach.isClaimed
+                ? AppTheme.surfaceLight.withValues(alpha: 0.5)
+                : AppTheme.goldBg.withValues(alpha: 0.2))
+            : AppTheme.surfaceLight.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: ach.isUnlocked && !ach.isClaimed
+              ? AppTheme.gold.withValues(alpha: 0.5)
+              : const Color(0xFF2E3F5B),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: ach.isUnlocked ? AppTheme.surface : Colors.black26,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              ach.isUnlocked ? ach.icon : '🔒',
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ach.title,
+                  style: TextStyle(
+                    color: ach.isUnlocked
+                        ? AppTheme.textPrimary
+                        : AppTheme.textMuted,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  ach.description,
+                  style: TextStyle(
+                    color: ach.isUnlocked
+                        ? AppTheme.textSecondary
+                        : AppTheme.textMuted,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '+${ach.rewardExp} EXP • +${ach.rewardGold} Gold',
+                  style: TextStyle(
+                    color: ach.isUnlocked ? AppTheme.gold : AppTheme.textMuted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (ach.isUnlocked && !ach.isClaimed) ...[
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.gold,
+                foregroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                viewModel.claimAchievement(ach.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('🎉 Trofi "${ach.title}" berhasil diklaim!'),
+                  ),
+                );
+              },
+              child: const Text('Klaim', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ] else if (ach.isClaimed) ...[
+            const Icon(Icons.check_circle_rounded, color: AppTheme.success, size: 22),
+          ] else ...[
+            const Text('Terkunci', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDemoSimulationCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B1B33),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Text('🧪', style: TextStyle(fontSize: 20)),
+              SizedBox(width: 8),
+              Text(
+                'Mode Uji Coba (Demo Simulator)',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Uji logika penalti HP dan reset quest harian secara instan seolah-olah 1 hari sudah berlalu.',
+            style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(height: 14),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 44),
+            ),
+            icon: const Icon(Icons.fast_forward_rounded, size: 18),
+            label: const Text('Simulasikan Hari Baru (+24 Jam)'),
+            onPressed: () {
+              HapticFeedback.vibrate();
+              viewModel.simulateNextDay();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('⚡ Simulasi hari baru aktif! Periksa HP & Quest harian.'),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

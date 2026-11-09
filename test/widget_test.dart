@@ -58,5 +58,28 @@ void main() {
       expect(HeroModel.calculateMaxExp(2), 235);
       expect(HeroModel.calculateMaxHp(1, HeroClass.warrior), 125);
     });
+
+    test('Completing quest unlocks first_quest achievement and grants claim reward', () async {
+      final firstQuest = viewModel.quests.first;
+      await viewModel.completeQuest(firstQuest.id);
+
+      final firstAch = viewModel.achievements.firstWhere((a) => a.id == 'first_quest');
+      expect(firstAch.isUnlocked, isTrue);
+      expect(firstAch.isClaimed, isFalse);
+
+      final prevGold = viewModel.hero.gold;
+      await viewModel.claimAchievement(firstAch.id);
+
+      expect(viewModel.hero.gold, prevGold + firstAch.rewardGold);
+      expect(viewModel.achievements.firstWhere((a) => a.id == 'first_quest').isClaimed, isTrue);
+    });
+
+    test('Simulate next day triggers daily rollover penalty on uncompleted quests', () async {
+      final initialHp = viewModel.hero.currentHp;
+      // Leave all quests incomplete and advance day
+      await viewModel.simulateNextDay();
+
+      expect(viewModel.hero.currentHp, lessThan(initialHp));
+    });
   });
 }

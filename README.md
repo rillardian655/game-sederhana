@@ -4,7 +4,7 @@
 
 # HabitQuest ⚔️ – Gamified RPG Habit & Routine Tracker
 
-[![Download APK](https://img.shields.io/badge/Download_APK-HabitQuest.apk-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/rillardian655/game-sederhana/releases/download/v1.0.0/HabitQuest.apk)
+[![Download APK](https://img.shields.io/badge/Download_APK-HabitQuest--v1.0.0.apk-2ea44f?style=for-the-badge&logo=android&logoColor=white)](https://github.com/rillardian655/game-sederhana/releases/download/v1.0.0/HabitQuest-v1.0.0.apk)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.12+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
